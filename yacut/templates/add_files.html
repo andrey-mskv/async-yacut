@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Загрузка файлов{% endblock %}
+{% block content %}
+  <main>
+    <section class="container my-5 px-4">
+
+      <h1 class="text-center"><span style="color:red">Ya</span>Cut</h1>
+      <p class="text-center my-4">
+        Загрузите файлы и получите на них короткие ссылки
+      </p>
+
+      <div class="container">
+        <div class="row my-3">
+          <div class="col-sm">
+          </div>
+          <div class="col-sm">
+
+            <!-- enctype для прикрепления файлов -->
+            <form method="POST" novalidate enctype="multipart/form-data">
+              <div>
+                <div>
+                  {{ form.csrf_token }}
+                  {{ form.images(class="form-control form-control-lg py-2 mb-3", placeholder=form.images.label.text) }}
+                  {% if form.images.errors %}
+                    <p>
+                      <span style="color:red">
+                        {% for error in form.images.errors %}
+                          {{ error }}
+                        {% endfor %}
+                      </span>
+                    </p>
+                  {% endif %}
+                </div>
+
+               {{ form.submit(class="btn btn-primary") }}
+              </div>
+            </form>
+            
+          </div>
+          <div class="col-sm">
+          </div>
+        </div>
+      </div>
+
+    </section>
+  </main>
+{% endblock %}
