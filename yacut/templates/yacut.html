@@ -68,9 +68,12 @@
         <div class="col-sm">
         </div>
         <div class="col-sm">
-          <p class="text-center">
-          <h5 class="text-center">Пример информационного сообщения</h5>
-          </p>
+          {% if short_link %}
+            <p class="text-center">
+              Короткая ссылка:
+              <a href="{{ short_link }}" target="_blank">{{ short_link }}</a>
+            </p>
+          {% endif %}
         </div>
         <div class="col-sm">
         </div>

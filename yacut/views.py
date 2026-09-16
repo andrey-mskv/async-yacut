@@ -1,6 +1,12 @@
-from flask import render_template, redirect
+from flask import (
+    render_template,
+    redirect,
+    flash,
+    get_flashed_messages,
+    url_for,
+)
 
-from . import app
+from . import app, db
 
 import secrets
 import string
@@ -19,9 +25,41 @@ def get_unique_short_id(length: int = 6):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = YaCutForm()
+    short_links = get_flashed_messages(category_filter=['short_link'])
     if form.validate_on_submit():
-        pass
-    return render_template('yacut.html', form=form)
+        if form.custom_id.data:
+            short_id = form.custom_id.data
+            if (
+                short_id == 'files'
+                or URLMap.query.filter_by(short=short_id).first()  # noqa: W503
+            ):
+                form.custom_id.errors.append(
+                    'Предложенный вариант короткой ссылки уже существует.'
+                )
+                return render_template('yacut.html', form=form)
+        else:
+            short_id = get_unique_short_id()
+            while URLMap.query.filter_by(short=short_id).first():
+                short_id = get_unique_short_id()
+
+        url_map = URLMap(
+            short=short_id,
+            original=form.original_link.data,
+        )
+        db.session.add(url_map)
+        db.session.commit()
+        short_link = url_for(
+            'redirect_to_original_link', short_id=short_id, _external=True
+        )
+        # Сохраняем короткую ссылку в сессию
+        flash(short_link, 'short_link')
+        # Перенаправляем пользователя на главную
+        return redirect(url_for('index'))
+    return render_template(
+        'yacut.html',
+        form=form,
+        short_link=short_links[0] if short_links else None,
+    )
 
 
 @app.route('/files', methods=['GET', 'POST'])
