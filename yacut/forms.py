@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import URLField, SubmitField, StringField
-from wtforms.validators import DataRequired, Length, Optional, URL
+from wtforms.validators import DataRequired, Length, Optional, URL, Regexp
 from flask_wtf.file import MultipleFileField, FileSize, FileRequired
 
 
@@ -21,6 +21,10 @@ class YaCutForm(FlaskForm):
                 message='Не более 16 символов.',
             ),
             Optional(),
+            Regexp(
+                r'^[A-Za-z0-9]+$',
+                message=('Используйте латинские буквы и цифры.'),
+            ),
         ],
     )
     submit = SubmitField('Создать')
