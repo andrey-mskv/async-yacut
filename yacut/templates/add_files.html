@@ -20,11 +20,11 @@
               <div>
                 <div>
                   {{ form.csrf_token }}
-                  {{ form.images(class="form-control form-control-lg py-2 mb-3", placeholder=form.images.label.text) }}
-                  {% if form.images.errors %}
+                  {{ form.files(class="form-control form-control-lg py-2 mb-3", placeholder=form.files.label.text) }}
+                  {% if form.files.errors %}
                     <p>
                       <span style="color:red">
-                        {% for error in form.images.errors %}
+                        {% for error in form.files.errors %}
                           {{ error }}
                         {% endfor %}
                       </span>
@@ -43,21 +43,22 @@
       </div>
 
     <div class="container">
-      <div class="row ">
-        <div class="col-sm">
+      <div class="row">
+        <div class="col-sm-3">
         </div>
-        <div class="col-sm">
+        <div class="col-sm-6">
           {% if short_links %}
-              <ul>
-                  {% for short_link in short_links %}
-                      <li>
-                          <a href="{{ short_link }}">{{ short_link }}</a>
-                      </li>
-                  {% endfor %}
-              </ul>
+            <div class="mx-auto mt-4" style="max-width: 600px;">
+              {% for filename, link in short_links %}
+                <div class="d-flex py-2 border-bottom gap-3">
+                  <div class="text-truncate" style="width: 45%;" title="{{ filename }}">{{ filename }}</div>
+                  <div class="text-truncate" style="width: 45%;" title="{{ link }}" ><a href="{{ link }}" target="_blank">{{ link }}</a></div>
+                </div>
+              {% endfor %}
+            </div>
           {% endif %}
         </div>
-        <div class="col-sm">
+        <div class="col-sm-3">
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@ class YaCutForm(FlaskForm):
 
 
 class YaCutAddFilesForm(FlaskForm):
-    images = MultipleFileField(
+    files = MultipleFileField(
         validators=[
             FileRequired(message='Добавьте хотя бы один файл.'),
             FileSize(
