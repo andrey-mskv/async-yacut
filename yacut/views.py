@@ -1,8 +1,8 @@
 from flask import (
     render_template,
     redirect,
-    flash,
-    get_flashed_messages,
+    # flash,
+    # get_flashed_messages,
     url_for,
 )
 
@@ -26,7 +26,7 @@ def get_unique_short_id(length: int = 6):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = YaCutForm()
-    short_links = get_flashed_messages(category_filter=['short_link'])
+    # short_links = get_flashed_messages(category_filter=['short_link'])
     if form.validate_on_submit():
         if form.custom_id.data:
             short_id = form.custom_id.data
@@ -53,23 +53,29 @@ def index():
             'redirect_to_original_link', short_id=short_id, _external=True
         )
         # Сохраняем короткую ссылку в сессию
-        flash(short_link, 'short_link')
+        # flash(short_link, 'short_link')
         # Перенаправляем пользователя на главную
-        return redirect(url_for('index'))
+        return render_template(
+            'yacut.html',
+            form=form,
+            short_link=short_link,
+        )
     return render_template(
         'yacut.html',
         form=form,
-        short_link=short_links[0] if short_links else None,
+        # short_link=short_links[0] if short_links else None,
     )
 
 
 @app.route('/files', methods=['GET', 'POST'])
 async def add_files():
     form = YaCutAddFilesForm()
+    short_links = None
 
     if form.validate_on_submit():
         result = await async_upload_files_to_yadisk(form.files.data)
 
+        short_links = []
         for url, filename in result:
             short_id = get_unique_short_id()
 
@@ -90,20 +96,20 @@ async def add_files():
                 # _scheme='https',
             )
             # Сохраняем короткую ссылку в сессию
-            flash((filename, short_link), 'short_link')
+            short_links.append((filename, short_link))
 
         db.session.commit()
         # Перенаправляем пользователя на главную
-        return redirect(url_for('add_files'))
+        # return redirect(url_for('add_files'))
 
-    short_links = get_flashed_messages(
-        category_filter=['short_link'],
-    )
+    # short_links = get_flashed_messages(
+    #     category_filter=['short_link'],
+    # )
 
     return render_template(
         'add_files.html',
         form=form,
-        short_links=short_links if short_links else None,
+        short_links=short_links,
     )
 
 

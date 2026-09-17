@@ -23,7 +23,7 @@ class YaCutForm(FlaskForm):
             Optional(),
             Regexp(
                 r'^[A-Za-z0-9]+$',
-                message=('Используйте латинские буквы и цифры.'),
+                message=('Указано недопустимое имя для короткой ссылки'),
             ),
         ],
     )
