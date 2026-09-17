@@ -13,6 +13,7 @@ import string
 
 from .forms import YaCutForm, YaCutAddFilesForm
 from .models import URLMap
+from .yandex import upload_files_to_yadisk
 
 
 # Генератор случайной строки для короткой ссылки, a-z , A-Z, 0-9
@@ -65,12 +66,53 @@ def index():
 @app.route('/files', methods=['GET', 'POST'])
 def add_files():
     form = YaCutAddFilesForm()
+
     if form.validate_on_submit():
-        pass
-    return render_template('add_files.html', form=form)
+        urls = upload_files_to_yadisk(form.images.data)
+        print(f'urls: {urls}')
+        for url in urls:
+            short_id = get_unique_short_id()
+
+            while URLMap.query.filter_by(short=short_id).first():
+                short_id = get_unique_short_id()
+
+            url_map = URLMap(
+                short=short_id,
+                original=url,
+            )
+
+            db.session.add(url_map)
+
+            short_link = url_for(
+                'redirect_to_original_link',
+                short_id=short_id,
+                _external=True,
+                # _scheme='https',
+            )
+            # Сохраняем короткую ссылку в сессию
+            flash(short_link, 'short_link')
+        db.session.commit()
+        # Перенаправляем пользователя на главную
+        return redirect(url_for('add_files'))
+
+    short_links = get_flashed_messages(
+        category_filter=['short_link'],
+    )
+
+    print(f'short_links: {short_links}')
+
+    return render_template(
+        'add_files.html',
+        form=form,
+        short_links=short_links if short_links else None,
+    )
 
 
 @app.route('/<short_id>')
 def redirect_to_original_link(short_id):
     link = URLMap.query.filter_by(short=short_id).first_or_404()
-    return redirect(link.original)
+    response = redirect(link.original, code=302)
+    response.headers['Referrer-Policy'] = (
+        'no-referrer'  # фикс для Chrome при редиректе на yandex
+    )
+    return response

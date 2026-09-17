@@ -13,7 +13,7 @@ import urllib
 API_HOST = 'https://cloud-api.yandex.net/'
 API_VERSION = 'v1'
 
-AUTH_HEADERS = {'Authorization': f'OAuth {app.config['DISK_TOKEN']}'}
+AUTH_HEADERS = {'Authorization': f"OAuth {app.config['DISK_TOKEN']}"}
 
 REQUEST_UPLOAD_URL = f'{API_HOST}{API_VERSION}/disk/resources/upload'
 DOWNLOAD_LINK_URL = f'{API_HOST}{API_VERSION}/disk/resources/download'
@@ -55,41 +55,33 @@ DOWNLOAD_LINK_URL = f'{API_HOST}{API_VERSION}/disk/resources/download'
 # print(download_response.json()['href'])
 
 
-def upload_files_to_yadisk(images):
+def upload_files_to_yadisk(files):
     start_time = time.time()
 
     urls = []  # Список для сбора готовых ссылок.
-    if images is not None:  # Если были переданы изображения...
-        for image in images:  # ...для каждого изображения...
+    if files is not None:  # Если были переданы изображения...
+        for file in files:  # ...для каждого изображения...
 
-            # Вывести название загружаемого файла.
-            print(f'Загрузка изображения {image.filename}')
-            # Отправить GET-запрос для получения ссылки на загрузку файла.
+            # 1. Ссылка на загрузку
             response = requests.get(
-                headers={AUTH_HEADERS},
+                headers=AUTH_HEADERS,
                 params={
-                    'path': f'app:/{image.filename}',
+                    'path': f'app:/{file.filename}',
                     'overwrite': True,
-                    # 'fields': 'href',
                 },
                 url=REQUEST_UPLOAD_URL,
             )
-            print(
-                f'Получена ссылка на загрузку {image.filename}',
-                response.json(),
-            )
 
-            # Загрузка файла на полученную ссылку.
+            # Загрузка
             UPLOAD_URL = response.json()['href']
-            with open(image.filename, 'rb') as file:
-                response = requests.put(UPLOAD_URL, data=file)
+            data = file.read()
+            response = requests.put(UPLOAD_URL, data)
 
             # В location находится ссылка на расположение файла,
             # может содержать закодированные символы.
             location = urllib.parse.unquote(
                 response.headers['Location']
             ).replace('/disk', '')
-            print(f'Получена ссылка на расположение {location}')
 
             # Запрос ссылки для скачивания.
             response = requests.get(
@@ -100,8 +92,6 @@ def upload_files_to_yadisk(images):
                 },
                 url=DOWNLOAD_LINK_URL,
             )
-
-            print(f'Получена ссылка на скачивание {response.json()['href']}')
 
             data = response.json()
             url = data['href']

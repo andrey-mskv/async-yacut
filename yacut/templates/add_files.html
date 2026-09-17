@@ -42,6 +42,26 @@
         </div>
       </div>
 
+    <div class="container">
+      <div class="row ">
+        <div class="col-sm">
+        </div>
+        <div class="col-sm">
+          {% if short_links %}
+              <ul>
+                  {% for short_link in short_links %}
+                      <li>
+                          <a href="{{ short_link }}">{{ short_link }}</a>
+                      </li>
+                  {% endfor %}
+              </ul>
+          {% endif %}
+        </div>
+        <div class="col-sm">
+        </div>
+      </div>
+    </div>
+
     </section>
   </main>
 {% endblock %}
