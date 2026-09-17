@@ -13,7 +13,7 @@ import string
 
 from .forms import YaCutForm, YaCutAddFilesForm
 from .models import URLMap
-from .yandex import upload_files_to_yadisk
+from .yandex import async_upload_files_to_yadisk
 
 
 # Генератор случайной строки для короткой ссылки, a-z , A-Z, 0-9
@@ -64,13 +64,13 @@ def index():
 
 
 @app.route('/files', methods=['GET', 'POST'])
-def add_files():
+async def add_files():
     form = YaCutAddFilesForm()
 
     if form.validate_on_submit():
-        urls = upload_files_to_yadisk(form.images.data)
-        print(f'urls: {urls}')
-        for url in urls:
+        result = await async_upload_files_to_yadisk(form.files.data)
+
+        for url, filename in result:
             short_id = get_unique_short_id()
 
             while URLMap.query.filter_by(short=short_id).first():
@@ -90,7 +90,8 @@ def add_files():
                 # _scheme='https',
             )
             # Сохраняем короткую ссылку в сессию
-            flash(short_link, 'short_link')
+            flash((filename, short_link), 'short_link')
+
         db.session.commit()
         # Перенаправляем пользователя на главную
         return redirect(url_for('add_files'))
@@ -98,8 +99,6 @@ def add_files():
     short_links = get_flashed_messages(
         category_filter=['short_link'],
     )
-
-    print(f'short_links: {short_links}')
 
     return render_template(
         'add_files.html',
