@@ -9,8 +9,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 from . import (  # noqa: F401, E402
-    # cli_commands,
     # error_handlers,
     views,
-    # api_views,
+    api_views,
 )

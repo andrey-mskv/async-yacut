@@ -20,6 +20,6 @@ class URLMap(db.Model):
         )
 
     def from_dict(self, data):
-        for field in ['id', 'short', 'original', 'timestamp']:
+        for field in ['short', 'original']:
             if field in data:
                 setattr(self, field, data[field])
